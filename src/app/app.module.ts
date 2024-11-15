@@ -3,14 +3,23 @@ import { BrowserModule, provideClientHydration } from '@angular/platform-browser
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ChatbotComponent } from './chatbot/chatbot.component';
+import { FormsModule } from '@angular/forms'
+import { HttpClientModule } from '@angular/common/http';
+import { CapitalizePipe } from './capitalize.pipe'
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    ChatbotComponent,
+    CapitalizePipe,
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule,
+    HttpClientModule
   ],
   providers: [
     provideClientHydration()
