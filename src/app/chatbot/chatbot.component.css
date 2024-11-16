@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat+Subrayada:wght@400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+.main_container{
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: end;    
+}
+
+.chatbot_container{
+    height: 600px;
+    width: 350px;
+    border-radius: 20px;
+}
+
+.header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 90px;
+    border-radius: 15px 15px 20px 20px;
+    background: #008080;
+    box-shadow: 0px 1px 20px 0px rgba(0, 0, 0, 0.15);
+}
+
+.logo_section{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo_section img{
+    width: 40px;
+    height: auto;
+}
+
+.institute_name{
+    color: #FFF;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+}
+
+.refresh_cancel_button{
+    display: flex;
+    gap: 15px;
+}
+
+.refresh_cancel_button i{
+    color: white;
+    cursor: pointer;
+}
+
+/* body section */
+.body{
+    height: 490px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* align-items: end; */
+    justify-content: end;
+    background-image: url('../../assets/chatbot_bg.png');
+    background-size: cover;
+}
+
+/* chat section */
+.chats{
+    width: 100%;
+    height: 490px;
+    overflow-y: auto;
+    position: relative;
+    margin-bottom: 10px;
+    scroll-behavior: smooth;
+}
+
+.chats::-webkit-scrollbar{
+    width: 5px;
+}
+
+.chats::-webkit-scrollbar-thumb{
+    background-color: #008080;
+    border-radius: 30px;
+}
+
+.user_input{
+    width: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 14px; 
+    margin: 20px 0;
+}
+
+.input_content{
+    background-color: #008080;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 200px;
+}
+
+.user_input img{
+    margin-right: 10px;
+}
+
+.response{
+    display: flex;
+    justify-content: left;
+    align-items: start;
+    gap: 10px;
+    width: 100%;
+}
+
+.response img{
+    margin-left: 10px;
+}
+
+.response_text{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: start;
+    gap: 8px;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 14px; 
+}
+
+.heading{
+    background-color: #B5E2E2;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 200px;
+    line-height: 20px;
+}
+
+.note{
+    font-style: italic;
+    background-color: #B5E2E2;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 200px;
+    line-height: 20px;
+    font-size: 12px;
+}
+
+.options{
+    margin: 10px;
+    text-transform: capitalize;
+    cursor: pointer;
+}
+
+.hidden{
+    display: none;
+}
+
+/* date */
+.inputdate{
+    width: 250px;              
+    padding: 10px;           
+    border: 1px solid #ccc;  
+    border-radius: 5px;      
+    font-size: 16px;         
+    color: #333;  
+    margin: 10px 0 0 30px;
+}
+
+.inputdate:focus {
+    outline: none;            
+    border-color: #008080;    
+    box-shadow: 0 0 10px #008080;
+}
+
+.inputdate::-webkit-calendar-picker-indicator {
+    border: 3px solid #008080;
+    box-shadow: 0 0 10px #008080;
+    padding: 8px;              
+    border-radius: 50%;        
+    cursor: pointer;    
+  }
+
+/* input section */
+
+.input_field{
+    height: 70px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.input_field input{
+    height: 40px;
+    width: 200px;
+    border-radius: 30px;
+    padding: 0 15px;
+    border: none;
+    outline: 2px solid #008080;
+    font-size: 14px;
+}
+
+.input_field input::placeholder{
+    font-style: italic;
+}
+
+.input_field button{
+    border: none;
+    outline: none;
+    background-color: #36B8B8;
+    filter: drop-shadow(0px 4px 15px rgba(0, 0, 0, 0.15));
+    height: 45px;
+    width: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: inter;
+}
+
+@media(max-width : 500px){
+
+    .chatbot_container{
+        height: 500px;
+    }
+
+    .chats{
+        height: 340px;
+    }
+
+}

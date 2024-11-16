@@ -1,0 +1,73 @@
+<div class="main_container">
+	<div class="chatbot_container">
+		<!-- header section -->
+		<div class="header">
+			<!-- logo -->
+			<div class="logo_section">
+				<img src="../../assets/logo.svg" alt="">
+				<div class="institute_name">Rashtrotthana Help Desk</div>
+			</div>
+			<!-- refresh and cancel button -->
+			<div class="refresh_cancel_button">
+				<i class="fa-solid fa-rotate-right" (click)="refresh()"></i>
+				<i class="fa-solid fa-x"></i>
+			</div>
+		</div>
+
+		<!-- body -->
+		<div class="body">
+			<!-- chats -->
+			<div class="chats" #bodyWrapper>
+				<!-- user input -->
+				<div class="chatwrapper" *ngFor="let response of responseStructure">
+
+					<div class="user_input">
+						<div class="input_content" [ngClass]="{'hidden' : response.input === ''}">{{response.input}}
+						</div>
+						<img src="../../assets/user.svg" alt="" [ngClass]="{'hidden' : response.input === ''}">
+					</div>
+
+					<!-- bot response -->
+					<div class="response">
+						<img src="../../assets/logo.svg" alt="" [ngClass]="{'hidden' : response.heading === ''}">
+						<div class="response_text">
+							<div class="heading" [ngClass]="{'hidden' : response.heading === ''}">{{response.heading}}
+							</div>
+							<div class="heading" [ngClass]="{'hidden' : response.getmsg === ''}">{{response.getmsg}}
+							</div>
+							<div class="options" *ngFor="let options of response.options ; let i = index" (click)="handleOptionClick(options, i + 1)"
+								[ngClass]="{'hidden' : response.options === ''}">{{i + 1}}. {{capitalizeName(options)}}
+							</div>
+							<div class="note" [ngClass]="{'hidden' : response.notemsg === ''}">{{response.notemsg}}
+							</div>
+						</div>
+						
+					</div>
+
+					
+				</div>
+				<div class="response_text" [ngClass]="{'hidden': step !== 3}">
+					<input type="date" class="inputdate" [(ngModel)] = 'date'>
+				</div>
+				<div class="response_text" [ngClass]="{'hidden': step !== 12}">
+					<input type="file" class="inputdate" [(ngModel)] = 'selectedfile' (change)="this.savaPrescription($event)">
+				</div>
+			</div>
+			
+
+			<!-- input field -->
+			<div class="input_field">
+				<input type="text" placeholder="message..." [(ngModel)]="userInput" (keyup.enter)="buttonHandler()" [disabled]="isProcessing">
+				<button (click)="buttonHandler()" [disabled]="isProcessing"><img src="../../assets/send.svg" alt=""></button>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+<!-- <div>{{selectedDepartment}}</div> -->
+<!-- <div>{{selectedfile}}</div> -->
+<div>{{address}}</div>
+<div>{{latitude}}</div>
+<div>{{longitude}}</div>
