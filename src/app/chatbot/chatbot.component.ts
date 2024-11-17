@@ -17,7 +17,7 @@ export class ChatbotComponent implements OnInit {
 	services: any = ["Door Step Delivery", "Book an Appointment", "Emergency Service"]
 	selectedService: any = ''
 	userInput: any = ''
-	responseStructure: any[] = [{ heading: "", getmsg: "", options: [], notemsg: "", input: "" }]
+	responseStructure: any[] = [{ heading: "", getmsg: "", options: [], notemsg: "", input: "", emergency: "", patientName: "", doctorName: "", department: "", date: "", timeslot: "" }]
 	departments: any[] = []
 	selectedDepartment: any;
 	doctor: any[] = []
@@ -30,18 +30,19 @@ export class ChatbotComponent implements OnInit {
 		{
 			firstName: "",
 			lastName: "",
-			phone: ""
+			phone: "",
 		}
 	]
 	selectedDoorStepService: any = ''
 	selectedfile: File | null = null
 	otp: any = ''
-	selectedLocationType : any
+	selectedLocationType: any
 	latitude: number | undefined;
 	longitude: number | undefined;
 	address: string | undefined;
 	errorMessage: string | undefined;
 	locationErrormsg: any;
+	otpExpireTime : any = null
 
 
 	constructor(private chatbotService: DataService) { }
@@ -50,6 +51,7 @@ export class ChatbotComponent implements OnInit {
 		this.initialOptions()
 		console.log("step is :", this.step)
 		// this.getUserLocation()
+		// this.generateOtp()
 	}
 
 	ngAfterViewChecked(): void {
@@ -97,18 +99,14 @@ export class ChatbotComponent implements OnInit {
 				this.sendOtp()
 				break;
 
-			//vslidating otp and sending mail
+			//validating otp and sending mail
 			case 7:
-				this.sendingAppointmentMail()
+				this.confirmAppointment()
 				break;
 
 			case 8:
-				this.appointmentThankMsg()
+				this.sendingAppointmentMail()
 				break;
-			
-				
-
-			
 
 			// get prescription
 			case 11:
@@ -120,10 +118,12 @@ export class ChatbotComponent implements OnInit {
 				this.getNameDoorStep()
 				break;
 
+			//get location type
 			case 14:
 				this.gettingLocationType()
 				break;
 
+			//confirmLocation
 			case 15:
 				this.confirmLocation()
 				break;
@@ -131,7 +131,7 @@ export class ChatbotComponent implements OnInit {
 			case 16:
 				this.getAddressManually()
 				break;
-			
+
 			case 17:
 				this.getPhoneNumManual()
 				break;
@@ -139,12 +139,12 @@ export class ChatbotComponent implements OnInit {
 			case 18:
 				this.DoorstepOtp()
 				break
-			
-			
+
+
 			case 19:
 				this.sendingDoorStepMail()
 				break
-				
+
 
 
 			//default
@@ -162,11 +162,17 @@ export class ChatbotComponent implements OnInit {
 	//initial options
 	initialOptions(): void {
 		const newEntry = {
-			heading: "Namaste! Welcome to Rashtrotthana Hospital's appointment booking service.",
-			getmsg: "How may we assist you today?",
+			heading: "Namaste! Welcome to Rashtrotthana Hospital's Help Desk.",
+			getmsg: "How may I assist you today?",
 			options: this.services,
 			notemsg: "(Note : Please select a service by entering its number)",
-			input: ""
+			input: "",
+			emergency: "",
+			patientName: "",
+			doctorName: "",
+			department: "",
+			date: "",
+			timeslot: ""
 		}
 		this.responseStructure.push(newEntry)
 		this.step = 0
@@ -192,8 +198,7 @@ export class ChatbotComponent implements OnInit {
 			}
 
 			else if (service === "3" || service === "Emergency" || service === "I wanna call Ambulance" || service === "Emergency Service") {
-				this.selectedService = "Emergency Service"
-				this.userInput = ''
+				this.emergencyServices()
 
 			}
 
@@ -203,7 +208,13 @@ export class ChatbotComponent implements OnInit {
 					getmsg: "",
 					options: "",
 					notemsg: "(Note : Please select a service by entering its number)",
-					input: this.userInput
+					input: this.userInput,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				}
 				this.responseStructure.push(newEntry)
 				this.userInput = ''
@@ -227,7 +238,13 @@ export class ChatbotComponent implements OnInit {
 					getmsg: "Choose a Department by entering its number",
 					options: this.departments.map(dept => dept.name),
 					notemsg: "(Note : Please select a service by entering its number)",
-					input: this.selectedService
+					input: this.selectedService,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				}
 
 				this.responseStructure.push(newEntry)
@@ -239,7 +256,14 @@ export class ChatbotComponent implements OnInit {
 					getmsg: "",
 					options: "",
 					notemsg: "(Note : Please select a department by entering its number)",
-					input: this.userInput
+					input: this.userInput,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
+
 				}
 				this.responseStructure.push(newEntry)
 			}
@@ -267,10 +291,16 @@ export class ChatbotComponent implements OnInit {
 
 				const newEntry = {
 					heading: `You have choosen ${this.capitalizeName(this.selectedDepartment.name)}.`,
-					getmsg: "Please choose a department.",
+					getmsg: "Please choose a doctor.",
 					options: this.doctor.map(doc => doc.name),
 					notemsg: "(Note : Please select a doctor by entering their number)",
-					input: this.capitalizeName(this.selectedDepartment.name)
+					input: this.capitalizeName(this.selectedDepartment.name),
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				}
 
 				this.responseStructure.push(newEntry)
@@ -284,7 +314,13 @@ export class ChatbotComponent implements OnInit {
 					getmsg: "",
 					options: "",
 					notemsg: "",
-					input: this.userInput
+					input: this.userInput,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				}
 
 				this.responseStructure.push(newEntry)
@@ -305,11 +341,17 @@ export class ChatbotComponent implements OnInit {
 			this.selectedDoctor = selectedDoctor
 
 			const newEntry = {
-				heading: `You selected ${this.selectedDoctor.name}`,
+				heading: `You have selected ${this.selectedDoctor.name}`,
 				getmsg: "Now, please enter your preferred appointment date",
 				options: "",
 				notemsg: "Note : (Select a valid date. No previous dates allowed.)",
-				input: this.selectedDoctor.name
+				input: this.selectedDoctor.name,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -323,7 +365,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -336,24 +384,18 @@ export class ChatbotComponent implements OnInit {
 			const selectedDate = new Date(this.date);
 			const currentDate = new Date();
 
-			// Check if selected date is in the future
 			if (selectedDate > currentDate) {
 				this.selectedDate = this.date;
 
-				// Fetch available slots from the backend
-				const data = await this.chatbotService.getAvailableSlots(doctorId, date).toPromise();
-				const availableFrom = data.availableFrom;
-				const slotDuration = parseInt(data.slotDuration, 10);
+				// Fetch available slots and unavailable slots from the backend
+				const availableData = await this.chatbotService.getAvailableSlots(doctorId, date).toPromise();
+				const unavailableData = await this.chatbotService.getUnavailableSlots(doctorId, date).toPromise();
 
-				//Fetch unavailable slots from the backend
-				// const unavailableData = await this.chatbotService.getUnavailableSlots(doctorId, date).toPromise();
-				// const unavailableSlots = unavailableData.map((data:any)=> data.time)
+				const availableFrom = availableData.availableFrom; // E.g., "10:00-16:00"
+				const slotDuration = parseInt(availableData.slotDuration, 10); // E.g., 30 minutes
+				const unavailableSlots = unavailableData.map((data: any) => data.time); // Unavailable slots
 
-				// parse start time and end time
-				// const [unAvailStartTime, unAvailEndTime] = unavailableSlots.split('-')
-
-
-				// Parse start and end times
+				// Parse available time range
 				const [startTime, endTime] = availableFrom.split('-');
 				const [startHour, startMin] = startTime.split(':').map(Number);
 				const [endHour, endMin] = endTime.split(':').map(Number);
@@ -362,7 +404,10 @@ export class ChatbotComponent implements OnInit {
 				const slotTime = new Date(selectedDate);
 				slotTime.setHours(startHour, startMin, 0, 0);
 
-				// If today, skip past slots
+				const endSlotTime = new Date(selectedDate);
+				endSlotTime.setHours(endHour, endMin, 0, 0);
+
+				// If the selected date is today, skip past slots
 				if (selectedDate.toDateString() === currentDate.toDateString()) {
 					if (slotTime <= currentDate) {
 						slotTime.setHours(currentDate.getHours(), currentDate.getMinutes(), 0, 0);
@@ -370,11 +415,26 @@ export class ChatbotComponent implements OnInit {
 				}
 
 				// Generate slots
-				while (
-					slotTime.getHours() < endHour ||
-					(slotTime.getHours() === endHour && slotTime.getMinutes() < endMin)
-				) {
-					slots.push(this.formatTimeTo12Hour(slotTime));
+				while (slotTime < endSlotTime) {
+					const slotStart = this.formatTimeTo24Hour(slotTime);
+					const slotEnd = this.formatTimeTo24Hour(new Date(slotTime.getTime() + slotDuration * 60000));
+					const currentSlot = `${slotStart}-${slotEnd}`;
+
+					// Check if the slot overlaps with any unavailable slot
+					const isUnavailable = unavailableSlots.some((unavailableSlot: string) => {
+						const [unStart, unEnd] = unavailableSlot.split('-').map((time: string) => this.toMinutes(time));
+						const [slotStartMinutes, slotEndMinutes] = currentSlot
+							.split('-')
+							.map((time: string) => this.toMinutes(time));
+						return slotStartMinutes < unEnd && slotEndMinutes > unStart; // Overlap condition
+					});
+
+					// Add the slot if it's not unavailable
+					if (!isUnavailable) {
+						slots.push(currentSlot);
+					}
+
+					// Move to the next slot
 					slotTime.setMinutes(slotTime.getMinutes() + slotDuration);
 				}
 
@@ -385,20 +445,32 @@ export class ChatbotComponent implements OnInit {
 					getmsg: "Now, please select a time slot from the available options.",
 					options: this.timeSlots.map((slot) => slot),
 					notemsg: "(Note: Please select a time slot by entering its number)",
-					input: this.selectedDate
+					input: this.selectedDate,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				};
 				this.responseStructure.push(newEntry);
 
 				this.step = 4;
 				this.userInput = '';
 			} else {
-				// If date is in the past, show an error message
+				// If the selected date is in the past
 				const newEntry = {
 					heading: "Please choose a valid date",
 					getmsg: "",
 					options: "",
 					notemsg: "(Note: Select a valid date. No previous dates allowed.)",
-					input: this.date
+					input: this.date,
+					emergency: "",
+					patientName: "",
+					doctorName: "",
+					department: "",
+					date: "",
+					timeslot: ""
 				};
 				this.responseStructure.push(newEntry);
 				this.date = '';
@@ -407,6 +479,19 @@ export class ChatbotComponent implements OnInit {
 			console.error('Error fetching available slots:', error);
 			alert('Failed to fetch available slots');
 		}
+	}
+
+	// Utility function to format time to 24-hour format
+	formatTimeTo24Hour(date: Date): string {
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+	}
+
+	// Utility function to convert time to minutes
+	toMinutes(time: string): number {
+		const [hours, minutes] = time.split(':').map(Number);
+		return hours * 60 + minutes;
 	}
 
 	// get name and get slots
@@ -423,7 +508,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "Please enter your full name for the appointment.",
 				options: "",
 				notemsg: "(Note: Enter your name in the format: Firstname Lastname, e.g., Rajesh Kumar)",
-				input: this.selectedTimeSlot
+				input: this.selectedTimeSlot,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -437,7 +528,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			};
 			this.responseStructure.push(newEntry);
 		}
@@ -458,8 +555,14 @@ export class ChatbotComponent implements OnInit {
 				heading: `You entered ${this.userInfo.firstName} ${this.userInfo.lastName} as your name.`,
 				getmsg: "Next, please enter your phone number.",
 				options: "",
-				notemsg: "(Note: Enter your phone number in a 10-digit format, e.g., 9876543210)",
-				input: `${this.userInfo.firstName} ${this.userInfo.lastName}`
+				notemsg: "(Note: Enter your phone number in a 10-digit format.)",
+				input: `${this.userInfo.firstName} ${this.userInfo.lastName}`,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 			this.step = 6
@@ -471,7 +574,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
@@ -485,14 +594,20 @@ export class ChatbotComponent implements OnInit {
 		if (isvalid) {
 			this.userInfo.phone = `91${this.userInput}`
 
-			this.otp = '123456'
+			this.generateOtp()
 
 			const newEntry = {
-				heading: `You entered ${this.userInfo.phone} as your phone number. We will now send an OTP for verification.`,
+				heading: `You entered ${this.userInfo.phone} as your phone number. We sent an OTP for verification.`,
 				getmsg: "Please enter the OTP",
 				options: "",
 				notemsg: "",
-				input: this.userInfo.phone
+				input: this.userInfo.phone,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 
@@ -506,17 +621,65 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInfo.phone
+				input: this.userInfo.phone,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
 	}
 
+	// confirming appointment
+	async confirmAppointment(): Promise<void> {
+		const usersOtp = this.userInput
+		const options = ["Yes, proceed with the booking.", "No, I need to make changes."]
+		if (usersOtp === this.otp) {
+			const newEntry = {
+				heading: `Thanks you for the verification.`,
+				getmsg: "Here are your booking details. Kindly confirm,",
+				options: options,
+				notemsg: "",
+				input: this.otp,
+				emergency: "",
+				patientName: `${this.userInfo.firstName} ${this.userInfo.lastName}`,
+				doctorName: this.selectedDoctor.name,
+				department: this.capitalizeName(this.selectedDepartment.name),
+				date: this.selectedDate,
+				timeslot: this.selectedTimeSlot
+			}
+			this.responseStructure.push(newEntry)
+			console.log(newEntry)
+			this.step = 8
+			this.userInput = ''
+		}
+		else{
+			const newEntry = {
+				heading: `Invalid OTP`,
+				getmsg: "Try Again",
+				options: "",
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: ``,
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+		}
+
+	}
+
 	// verifying OTP and sending appointment details as mail
 	async sendingAppointmentMail(): Promise<void> {
-		const usersOtp = this.userInput
+		const userconfirm = this.userInput
 
-		if (usersOtp === this.otp) {
+		if (userconfirm === "1" || userconfirm === "Yes, proceed with the booking." || userconfirm === "yeah" || userconfirm === "yes") {
 			console.log("doctor", this.selectedDoctor, "user", this.userInfo)
 			const formdata = {
 				doctorName: this.selectedDoctor.name,
@@ -527,46 +690,88 @@ export class ChatbotComponent implements OnInit {
 				appointmentTime: this.selectedTimeSlot
 			}
 
-			this.step = 
-
-			console.log(formdata)
-			console.log("email sent")
-
 			this.chatbotService.appointMail(formdata).subscribe(
 				(res) => {
 					console.log('Email sent successfully', res);
-					alert('Email sent successfully');
+					this.appointmentThankMsg()
 				},
 				(err) => {
 					console.error('Error sending email', err);
-					alert('Failed to send email');
+					const newEntry = {
+						heading: `Failed to send email`,
+						getmsg: "Please try again",
+						options: "",
+						notemsg: "",
+						input: this.userInput,
+						emergency: "",
+						patientName: "",
+						doctorName: "",
+						department: "",
+						date: "",
+						timeslot: ""
+					}
+					this.responseStructure.push(newEntry)
 				}
 			);
+		}
+
+		else if(userconfirm === "2" || userconfirm === " No, I need to make changes." || userconfirm === "no" || userconfirm === "No") {
+			this.initialOptions()
+		}
+		else {
+			const newEntry = {
+				heading: `Please enter valid input`,
+				getmsg: "",
+				options: "",
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
 		}
 	}
 
 	// appopintment thank you message
-	appointmentThankMsg() : void{
-		const usersOtp = this.userInput
+	appointmentThankMsg(): void {
+		const userconfirm = this.userInput
 
-		if (usersOtp === this.otp){
-		const newEntry = {
-			heading: `Thank you, ${this.userInfo.firstName} ${this.userInfo.lastName}! We have received your appointment.`,
-			getmsg: "Our team will get back to you shortly.",
-			options: "",
-			notemsg: "",
-			input: ''
-		}
-		this.responseStructure.push(newEntry)
-		}
-
-		else{
+		if (userconfirm === "1" || userconfirm === "Yes, proceed with the booking." || userconfirm === "yeah" || userconfirm === "yes") {
 			const newEntry = {
-				heading: `Incorrect OTP`,
-				getmsg: "Try again.",
+				heading: `Appointment request received for ${this.selectedDate} at ${this.selectedTimeSlot}. Our team will get back to you shortly.`,
+				getmsg: "Thank you for choosing Rashtrotthana Hospital.",
 				options: "",
 				notemsg: "",
-				input: ''
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+		}
+		else if(userconfirm === "2" || userconfirm === " No, I need to make changes." || userconfirm === "no" || userconfirm === "No") {
+			this.step = 0
+		}
+		else {
+			const newEntry = {
+				heading: `Please enter valid input`,
+				getmsg: "",
+				options: "",
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
@@ -581,8 +786,14 @@ export class ChatbotComponent implements OnInit {
 			heading: `You have selected doorstep delivery service.`,
 			getmsg: "Please select the type of service by entering its number:",
 			options: doorStepServices,
-			notemsg: "",
-			input: this.userInput
+			notemsg: "( Note : Doorstep services are available from 8:00 AM to 8:00 PM)",
+			input: this.userInput,
+			emergency: "",
+			patientName: "",
+			doctorName: "",
+			department: "",
+			date: "",
+			timeslot: ""
 		}
 
 		this.responseStructure.push(newEntry)
@@ -596,11 +807,17 @@ export class ChatbotComponent implements OnInit {
 			this.selectedDoorStepService = "Pharmacy"
 
 			const newEntry = {
-				heading: `You selected Pharmacy.`,
+				heading: `You have selected Pharmacy.`,
 				getmsg: "Please upload your prescription to proceed.",
 				options: '',
 				notemsg: "",
-				input: this.selectedDoorStepService
+				input: this.selectedDoorStepService,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -612,11 +829,17 @@ export class ChatbotComponent implements OnInit {
 			this.selectedDoorStepService = "Blood Sample Collection"
 
 			const newEntry = {
-				heading: `You selected Blood Sample Collection.`,
+				heading: `You have selected Blood Sample Collection.`,
 				getmsg: "Please upload your prescription to proceed.",
 				options: '',
 				notemsg: "",
-				input: this.selectedDoorStepService
+				input: this.selectedDoorStepService,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -630,7 +853,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: '',
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -660,7 +889,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "Enter your full name.",
 				options: '',
 				notemsg: "(Note: Enter your name in the format: Firstname Lastname, e.g., Rajesh Kumar)",
-				input: this.selectedfile.name
+				input: this.selectedfile.name,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 
 			this.responseStructure.push(newEntry)
@@ -687,7 +922,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "Next, please select your address type:",
 				options: ['Use current location', 'Enter address manually'],
 				notemsg: "( Note : Door Step Service is free within a 5km radius of Rashtrotthana Hospital. For locations beyond 5 km, delivery charges will apply)",
-				input: `${this.userInfo.firstName} ${this.userInfo.lastName}`
+				input: `${this.userInfo.firstName} ${this.userInfo.lastName}`,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 			this.step = 14
@@ -699,7 +940,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
@@ -707,15 +954,15 @@ export class ChatbotComponent implements OnInit {
 
 	// getting address type manual or auto current location
 	async gettingLocationType(): Promise<void> {
-		if(this.userInput === '1' || this.userInput === "Use current location"){
+		if (this.userInput === '1' || this.userInput === "Use current location") {
 			await this.getUserLocation()
 		}
 
-		else if(this.userInput === '2' || this.userInput === "Enter address manually"){
+		else if (this.userInput === '2' || this.userInput === "Enter address manually") {
 			await this.getAddressManually()
 		}
 
-		else{
+		else {
 			console.log("please enter valid input")
 		}
 	}
@@ -723,132 +970,160 @@ export class ChatbotComponent implements OnInit {
 	// function to get current location automatically
 	getUserLocation(): void {
 		if (navigator.geolocation) {
-		  navigator.geolocation.getCurrentPosition(
-			async (position) => {
-			  this.latitude = position.coords.latitude;
-			  this.longitude = position.coords.longitude;
-			  await this.getCurrentAddress(this.latitude, this.longitude);
-			},
-			(error) => {
-			  switch (error.code) {
-				case error.PERMISSION_DENIED:
-				  this.errorMessage = "Location permission denied by user.";
-				  break;
-				case error.POSITION_UNAVAILABLE:
-				  this.errorMessage = "Location information is unavailable.";
-				  break;
-				case error.TIMEOUT:
-				  this.errorMessage = "The request to get user location timed out.";
-				  break;
-				default:
-				  this.errorMessage = "An unknown error occurred.";
-				  break;
-			  }
-			}
-		  );
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					this.latitude = position.coords.latitude;
+					this.longitude = position.coords.longitude;
+					await this.getCurrentAddress(this.latitude, this.longitude);
+				},
+				(error) => {
+					switch (error.code) {
+						case error.PERMISSION_DENIED:
+							this.errorMessage = "Location permission denied by user.";
+							break;
+						case error.POSITION_UNAVAILABLE:
+							this.errorMessage = "Location information is unavailable.";
+							break;
+						case error.TIMEOUT:
+							this.errorMessage = "The request to get user location timed out.";
+							break;
+						default:
+							this.errorMessage = "An unknown error occurred.";
+							break;
+					}
+				}
+			);
 		} else {
-		  this.errorMessage = "Geolocation is not supported by this browser.";
+			this.errorMessage = "Geolocation is not supported by this browser.";
 		}
 	}
 
 	// function to convert location into address
 	async getCurrentAddress(latitude: any, longitude: any): Promise<void> {
 		try {
-		  const data = await this.chatbotService.getLocation(latitude, longitude).toPromise();
-		  if (data.status === 'OK' && data.results.length > 0) {
-			console.log(data)
-			this.address = data.results[0].formatted_address;
-			
-			if(this.address){
-				this.selectedLocationType = "auto"
-				const confirmAddress = ["Confirm Location", "Enter Manually"]
-				const newEntry = {
-					heading: 'Please confirm your location',
-					getmsg: "",
-					options: confirmAddress,
-					notemsg: "",
-					input: this.address
+			const data = await this.chatbotService.getLocation(latitude, longitude).toPromise();
+			if (data.status === 'OK' && data.results.length > 0) {
+				console.log(data)
+				this.address = data.results[0].formatted_address;
+
+				if (this.address) {
+					this.selectedLocationType = "auto"
+					const confirmAddress = ["Confirm Location", "Enter Manually"]
+					const newEntry = {
+						heading: 'Please confirm your location',
+						getmsg: "",
+						options: confirmAddress,
+						notemsg: "",
+						input: this.address,
+						emergency: "",
+						patientName: "",
+						doctorName: "",
+						department: "",
+						date: "",
+						timeslot: ""
+					}
+					this.responseStructure.push(newEntry)
+					this.step = 15
+					this.userInput = ''
 				}
-				this.responseStructure.push(newEntry)
-				// this.userInput = ''
-	
-				// this.responseStructure.push(newEntry)
-	
-				this.step = 15
-				this.userInput = ''
-			  }
-			  else{
-				const newEntry = {
-					heading: this.locationErrormsg,
-					getmsg: "",
-					options: "",
-					notemsg: "",
-					input: "can't get address"
+				else {
+					const newEntry = {
+						heading: this.locationErrormsg,
+						getmsg: "",
+						options: "",
+						notemsg: "",
+						input: "can't get address",
+						emergency: "",
+						patientName: "",
+						doctorName: "",
+						department: "",
+						date: "",
+						timeslot: ""
+					}
+
+					this.responseStructure.push(newEntry)
 				}
-	
-				this.responseStructure.push(newEntry)
-			  }
-		  } else {
-			this.errorMessage = "No address found for the provided location.";
-		  }
+			} else {
+				this.errorMessage = "No address found for the provided location.";
+			}
 		} catch (err) {
-		  this.errorMessage = "Unable to retrieve address.";
-		  console.error('Error fetching address:', err);
+			this.errorMessage = "Unable to retrieve address.";
+			console.error('Error fetching address:', err);
 		}
 	}
 
 	//getting address manually
-	getAddressManually(): void{
+	getAddressManually(): void {
 		this.selectedLocationType = "manual"
 		const newEntry = {
 			heading: 'Please enter your address',
 			getmsg: "",
 			options: "",
 			notemsg: "( Note : Blood Sample Collection is free within a 5km radius of Rashtrotthana Hospital. For locations beyond 5 km, delivery charges will apply)",
-			input: "Enter address manually"
+			input: "Enter address manually",
+			emergency: "",
+			patientName: "",
+			doctorName: "",
+			department: "",
+			date: "",
+			timeslot: ""
 		}
 
 		this.responseStructure.push(newEntry)
 		this.step = 17
+		this.userInput = ''
 	}
 
 	// confirming address
-	async confirmLocation() :Promise<void>{
-		if (this.userInput === '1' || this.userInput === "Confirm Location" || this.userInput === "confirm location"){
+	async confirmLocation(): Promise<void> {
+		if (this.userInput === '1' || this.userInput === "Confirm Location" || this.userInput === "confirm location") {
 			const newEntry = {
-					heading: 'Confirmed Your address',
-					getmsg: "Please enter your Phone number",
-					options: "",
-					notemsg: "(Note: Enter your phone number in a 10-digit format, e.g., 9876543210)",
-					input: "Confirm Location"
-				}
-				this.responseStructure.push(newEntry)
-				this.step = 18
+				heading: 'Confirmed Your address',
+				getmsg: "Please enter your Phone number",
+				options: "",
+				notemsg: "(Note: Enter your phone number in a 10-digit format, e.g., 9876543210)",
+				input: "Confirm Location",
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+			this.step = 18
+			this.userInput = ''
 		}
 
-		else if(this.userInput === '2' || this.userInput === "Enter Manually" || this.userInput === "enter manually"){
+		else if (this.userInput === '2' || this.userInput === "Enter Manually" || this.userInput === "enter manually") {
 			this.getAddressManually()
 		}
 
-		else{
+		else {
 			const newEntry = {
 				heading: 'Invalid input. Please enter vaild option',
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInput
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
 	}
 
 	// getting number from user who entered laocation manually and saving their address
-	async getPhoneNumManual() : Promise<void>{
+	async getPhoneNumManual(): Promise<void> {
 
 		const pattern = /^[0-9]*\s?[a-zA-Z\s,.'-]+$/
 		const address = pattern.test(this.userInput)
 
-		if(address){
+		if (address) {
 			this.address = this.userInput
 
 			const newEntry = {
@@ -856,32 +1131,44 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "Please enter your Phone number",
 				options: "",
 				notemsg: "(Note: Enter your phone number in a 10-digit format, e.g., 9876543210)",
-				input: this.address
+				input: this.address,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
-			
-			this.responseStructure.push(newEntry)		
-			
+
+			this.responseStructure.push(newEntry)
+
 			this.step = 18
 			this.userInput = ''
 		}
-	}	
+	}
 
 	// formatting phone number and sending otp
-	async DoorstepOtp() : Promise<void>{
+	async DoorstepOtp(): Promise<void> {
 		const pattern = /^[6-9][0-9]{9}$/;
 		const isvalid = pattern.test(this.userInput)
 
 		if (isvalid) {
 			this.userInfo.phone = `91${this.userInput}`
 
-			this.otp = '123456'
+			this.generateOtp()
 
 			const newEntry = {
-				heading: `You entered ${this.userInfo.phone} as your phone number. We will now send an OTP for verification.`,
+				heading: `You entered ${this.userInfo.phone} as your phone number. We sent an OTP for verification.`,
 				getmsg: "Please enter the OTP",
 				options: "",
 				notemsg: "",
-				input: this.userInfo.phone
+				input: this.userInfo.phone,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 
@@ -895,7 +1182,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: this.userInfo.phone
+				input: this.userInfo.phone,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 		}
@@ -905,6 +1198,7 @@ export class ChatbotComponent implements OnInit {
 	//verifying otp and sending mail
 	async sendingDoorStepMail(): Promise<void> {
 		const usersOtp = this.userInput
+
 
 		if (usersOtp === this.otp) {
 			console.log("doctor", this.selectedDoctor, "user", this.userInfo)
@@ -920,14 +1214,96 @@ export class ChatbotComponent implements OnInit {
 			this.chatbotService.doorstepmail(formdata).subscribe(
 				(res) => {
 					console.log('Email sent successfully', res);
-					alert('Email sent successfully');
+					const newEntry = {
+						heading: ``,
+						getmsg: "",
+						options: "",
+						notemsg: "",
+						input: this.userInput,
+						emergency: "",
+						patientName: "",
+						doctorName: "",
+						department: "",
+						date: "",
+						timeslot: ""
+					}
+					this.responseStructure.push(newEntry)
+					this.doorStepThankMsg()
 				},
 				(err) => {
 					console.error('Error sending email', err);
-					alert('Failed to send email');
+					const newEntry = {
+						heading: `Failed to send email`,
+						getmsg: "Please try again",
+						options: "",
+						notemsg: "",
+						input: this.userInput,
+						emergency: "",
+						patientName: "",
+						doctorName: "",
+						department: "",
+						date: "",
+						timeslot: ""
+					}
+					this.responseStructure.push(newEntry)
 				}
 			);
 		}
+		else {
+
+		}
+	}
+
+	async doorStepThankMsg(): Promise<void> {
+		if (this.otp === this.userInput) {
+			const newEntry = {
+				heading: `Thank you, ${this.userInfo.firstName} ${this.userInfo.lastName}! We have received your ${this.selectedDoorStepService} service request.`,
+				getmsg: " Our team will get back to you shortly.",
+				options: "",
+				notemsg: "",
+				input: '',
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+		}
+		else {
+			const newEntry = {
+				heading: `invalid OTP`,
+				getmsg: "Plaease enter correct OTP",
+				options: "",
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+		}
+	}
+
+	async emergencyServices(): Promise<void> {
+		const newEntry = {
+			heading: "In case of any medical emergency, please reach out to our 24/7 helpline:",
+			getmsg: "",
+			options: "",
+			notemsg: "",
+			input: "Emergency Services",
+			emergency: "8904943666",
+			patientName: "",
+			doctorName: "",
+			department: "",
+			date: "",
+			timeslot: ""
+		}
+		this.responseStructure.push(newEntry)
 	}
 
 	//capitalize
@@ -942,7 +1318,13 @@ export class ChatbotComponent implements OnInit {
 			getmsg: "",
 			options: "",
 			notemsg: "",
-			input: this.userInput
+			input: this.userInput,
+			emergency: "",
+			patientName: "",
+			doctorName: "",
+			department: "",
+			date: "",
+			timeslot: ""
 		}
 
 		this.responseStructure.push(newEntry)
@@ -974,7 +1356,13 @@ export class ChatbotComponent implements OnInit {
 				getmsg: "",
 				options: "",
 				notemsg: "",
-				input: "refresh"
+				input: "refresh",
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
 			this.initialOptions()
@@ -991,9 +1379,222 @@ export class ChatbotComponent implements OnInit {
 		}
 	}
 
+	// generate otp
+	generateOtp(): void {
+		// Generate a 6-digit OTP
+		this.otp = Math.floor(100000 + Math.random() * 900000).toString();
+		console.log('Generated OTP:', this.otp);
+	  
+		// Clear any existing expiration timer
+		if (this.otpExpireTime) {
+		  console.log('Clearing previous timeout');
+		  clearTimeout(this.otpExpireTime);
+		}
+	  
+		// Set a new expiration timer for 2 minutes
+		this.otpExpireTime = setTimeout(() => {
+		  this.expireOtp();
+		}, 2 * 60 * 1000); // 2 minutes
+	  }
+	  
+	expireOtp(): void {
+		console.trace('OTP expired called from:');
+		// console.log('OTP expired:', this.otp);
+		this.otp = null; // Set OTP to null
+	}
+	  
 	//option clickable
 	handleOptionClick(option: string, optionIndex: number): void {
 		this.userInput = optionIndex.toString();
 		this.buttonHandler();
 	}
 }
+
+
+
+
+// async loadSlots(doctorId: any, date: string): Promise<void> {
+// 	try {
+// 		const selectedDate = new Date(this.date);
+// 		const currentDate = new Date();
+
+// 		// Check if selected date is in the future
+// 		if (selectedDate > currentDate) {
+// 			this.selectedDate = this.date;
+
+// 			// Fetch available slots from the backend
+// 			const data = await this.chatbotService.getAvailableSlots(doctorId, date).toPromise();
+// 			const availableFrom = data.availableFrom;
+// 			const slotDuration = parseInt(data.slotDuration, 10);
+
+// 			//Fetch unavailable slots from the backend
+// 			// const unavailableData = await this.chatbotService.getUnavailableSlots(doctorId, date).toPromise();
+// 			// const unavailableSlots = unavailableData.map((data:any)=> data.time)
+
+// 			// parse start time and end time
+// 			// const [unAvailStartTime, unAvailEndTime] = unavailableSlots.split('-')
+
+
+// 			// Parse start and end times
+// 			const [startTime, endTime] = availableFrom.split('-');
+// 			const [startHour, startMin] = startTime.split(':').map(Number);
+// 			const [endHour, endMin] = endTime.split(':').map(Number);
+
+// 			const slots: string[] = [];
+// 			const slotTime = new Date(selectedDate);
+// 			slotTime.setHours(startHour, startMin, 0, 0);
+
+// 			// If today, skip past slots
+// 			if (selectedDate.toDateString() === currentDate.toDateString()) {
+// 				if (slotTime <= currentDate) {
+// 					slotTime.setHours(currentDate.getHours(), currentDate.getMinutes(), 0, 0);
+// 				}
+// 			}
+
+// 			// Generate slots
+// 			while (
+// 				slotTime.getHours() < endHour ||
+// 				(slotTime.getHours() === endHour && slotTime.getMinutes() < endMin)
+// 			) {
+// 				slots.push(this.formatTimeTo12Hour(slotTime));
+// 				slotTime.setMinutes(slotTime.getMinutes() + slotDuration);
+// 			}
+
+// 			this.timeSlots = slots;
+
+// 			const newEntry = {
+// 				heading: `You entered ${this.selectedDate} as your appointment date.`,
+// 				getmsg: "Now, please select a time slot from the available options.",
+// 				options: this.timeSlots.map((slot) => slot),
+// 				notemsg: "(Note: Please select a time slot by entering its number)",
+// 				input: this.selectedDate
+// 			};
+// 			this.responseStructure.push(newEntry);
+
+// 			this.step = 4;
+// 			this.userInput = '';
+// 		} else {
+// 			// If date is in the past, show an error message
+// 			const newEntry = {
+// 				heading: "Please choose a valid date",
+// 				getmsg: "",
+// 				options: "",
+// 				notemsg: "(Note: Select a valid date. No previous dates allowed.)",
+// 				input: this.date
+// 			};
+// 			this.responseStructure.push(newEntry);
+// 			this.date = '';
+// 		}
+// 	} catch (error) {
+// 		console.error('Error fetching available slots:', error);
+// 		alert('Failed to fetch available slots');
+// 	}
+// }
+
+
+// 12 hour format
+
+// async loadSlots(doctorId: any, date: string): Promise<void> {
+//     try {
+//         const selectedDate = new Date(this.date);
+//         const currentDate = new Date();
+
+//         if (selectedDate > currentDate) {
+//             this.selectedDate = this.date;
+
+//             // Fetch available slots and unavailable slots from the backend
+//             const availableData = await this.chatbotService.getAvailableSlots(doctorId, date).toPromise();
+//             const unavailableData = await this.chatbotService.getUnavailableSlots(doctorId, date).toPromise();
+
+//             const availableFrom = availableData.availableFrom; // E.g., "10:00-16:00"
+//             const slotDuration = parseInt(availableData.slotDuration, 10); // E.g., 30 minutes
+//             const unavailableSlots = unavailableData.map((data: any) => data.time); // Unavailable slots
+
+//             // Parse available time range
+//             const [startTime, endTime] = availableFrom.split('-');
+//             const [startHour, startMin] = startTime.split(':').map(Number);
+//             const [endHour, endMin] = endTime.split(':').map(Number);
+
+//             const slots: string[] = [];
+//             const slotTime = new Date(selectedDate);
+//             slotTime.setHours(startHour, startMin, 0, 0);
+
+//             const endSlotTime = new Date(selectedDate);
+//             endSlotTime.setHours(endHour, endMin, 0, 0);
+
+//             // If the selected date is today, skip past slots
+//             if (selectedDate.toDateString() === currentDate.toDateString()) {
+//                 if (slotTime <= currentDate) {
+//                     slotTime.setHours(currentDate.getHours(), currentDate.getMinutes(), 0, 0);
+//                 }
+//             }
+
+//             // Generate slots
+//             while (slotTime < endSlotTime) {
+//                 const slotStart = this.formatTimeTo12Hour(slotTime);
+//                 const slotEnd = this.formatTimeTo12Hour(new Date(slotTime.getTime() + slotDuration * 60000));
+//                 const currentSlot = `${slotStart}-${slotEnd}`;
+
+//                 // Check if the slot overlaps with any unavailable slot
+//                 const isUnavailable = unavailableSlots.some((unavailableSlot: string) => {
+//                     const [unStart, unEnd] = unavailableSlot.split('-').map((time: string) => this.toMinutes(time));
+//                     const [slotStartMinutes, slotEndMinutes] = currentSlot
+//                         .split('-')
+//                         .map((time: string) => this.toMinutes(time));
+//                     return slotStartMinutes < unEnd && slotEndMinutes > unStart; // Overlap condition
+//                 });
+
+//                 // Add the slot if it's not unavailable
+//                 if (!isUnavailable) {
+//                     slots.push(currentSlot);
+//                 }
+
+//                 // Move to the next slot
+//                 slotTime.setMinutes(slotTime.getMinutes() + slotDuration);
+//             }
+
+//             this.timeSlots = slots;
+
+//             const newEntry = {
+//                 heading: `You entered ${this.selectedDate} as your appointment date.`,
+//                 getmsg: "Now, please select a time slot from the available options.",
+//                 options: this.timeSlots.map((slot) => slot),
+//                 notemsg: "(Note: Please select a time slot by entering its number)",
+//                 input: this.selectedDate
+//             };
+//             this.responseStructure.push(newEntry);
+
+//             this.step = 4;
+//             this.userInput = '';
+//         } else {
+//             // If the selected date is in the past
+//             const newEntry = {
+//                 heading: "Please choose a valid date",
+//                 getmsg: "",
+//                 options: "",
+//                 notemsg: "(Note: Select a valid date. No previous dates allowed.)",
+//                 input: this.date
+//             };
+//             this.responseStructure.push(newEntry);
+//             this.date = '';
+//         }
+//     } catch (error) {
+//         console.error('Error fetching available slots:', error);
+//         alert('Failed to fetch available slots');
+//     }
+// }
+
+// // Utility function to format time to 12-hour format
+// formatTimeTo12Hour(date: Date): string {
+//     const hours = date.getHours();
+//     const minutes = date.getMinutes();
+//     const period = hours >= 12 ? 'PM' : 'AM';
+//     const formattedHours = hours % 12 || 12;
+//     return `${formattedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+// }
+
+// // Utility function to convert time to minutes
+// toMinutes(time: string): number {
+//     const [hours, minutes] = time.split(':').map(Number);
+//     return hours * 60 + minutes;
+// }
