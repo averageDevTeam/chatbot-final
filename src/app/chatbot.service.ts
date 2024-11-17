@@ -49,7 +49,7 @@ export class DataService {
   }
 
   getUnavailableSlots(docId:any, date:any) : Observable<any>{
-    const unavailSoltsUrl = `${this.apiUrl}/doctors/unavailable/${docId}/${date}`
+    const unavailSoltsUrl = `${this.apiUrl}/avail/doctors/unavailable/${docId}/${date}`
     return this.http.get<any>(unavailSoltsUrl)
   }
 
