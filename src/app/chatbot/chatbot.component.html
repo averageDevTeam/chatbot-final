@@ -39,7 +39,7 @@
 							</div>
 							<div class="heading" [ngClass]="{'hidden' : response.getmsg === ''}">{{response.getmsg}}
 							</div>
-							<div class="heading" [ngClass]="{'hidden' : response.emergency === ''}">{{response.emergency}}
+							<div class="heading" [ngClass]="{'hidden' : response.emergency === ''}"><a href="9698669181">{{response.emergency}}</a>
 							</div>
 							<div class="heading" [ngClass]= "{'hidden' : response.patientName === ''}">
 								<div class="details">
@@ -75,7 +75,7 @@
 				<div class="response_text" [ngClass]="{'hidden': step !== 3}">
 					<input type="date" class="inputdate" [(ngModel)]='date'>
 				</div>
-				<div class="response_text" [ngClass]="{'hidden': step !== 12}">
+				<div class="response_text" [ngClass]="{'hidden': step !== 20}">
 					<input type="file" class="inputdate" [(ngModel)]='selectedfile'
 						(change)="this.savaPrescription($event)">
 				</div>
@@ -93,3 +93,5 @@
 </div>
 
 <div>{{otp}}</div>
+<div>{{userInfo.firstName}}</div>
+<div>{{userInfo.Lastname}}</div>

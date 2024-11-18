@@ -6,8 +6,8 @@ import { environment } from '../environment'
   providedIn: 'root'
 })
 export class DataService {
-  private apiUrl = 'http://localhost:3000';
-  private mapApi = environment.apiUrl
+  private apiUrl = environment.apiurl
+  private mapApi = environment.mapapiUrl
   private mapApiKey = environment.googleMapsApiKey
 
   constructor(private http: HttpClient) {}
@@ -29,7 +29,7 @@ export class DataService {
     const formData = new FormData();
     formData.append('image', imageFile, imageFile.name); // 'image' is the key expected by the backend
   
-    return this.http.post<any>(`${this.apiUrl}/storage/upload`, formData);
+    return this.http.post<any>(`${this.apiUrl}/api/storage/upload`, formData);
   }
 
   appointMail(formdata : any) : Observable<any>{
@@ -41,7 +41,7 @@ export class DataService {
   }
 
   doorstepmail(formData : FormData) : Observable<any>{
-    return this.http.post<any>(`${this.apiUrl}/mail/deliverymail`, formData)
+    return this.http.post<any>(`${this.apiUrl}/api/email/send-email-lab`, formData)
   }
 
   createAppointment(appointmentData: any): Observable<any> {
@@ -56,5 +56,13 @@ export class DataService {
   getLocation(latitude: any, longitude: any): Observable<any> {
     const locationUrl = `${this.mapApi}?latlng=${latitude},${longitude}&key=${this.mapApiKey}`;
     return this.http.get<any>(locationUrl);
+  }
+
+  otpSms(details:any) : Observable<any>{
+    return this.http.post<any>(`${this.apiUrl}/api/sms/sms-chatbot`,details)
+  }
+
+  whatsApp(details : any) : Observable<any>{
+    return this.http.post<any>(`${this.apiUrl}/api/whatsapp/send-receive-message`, details)
   }
 }
