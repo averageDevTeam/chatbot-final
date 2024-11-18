@@ -14,7 +14,7 @@ export class ChatbotComponent implements OnInit {
 
 	isProcessing: boolean = false
 	step: any
-	services: any = ["Door Step Delivery", "Book an Appointment", "Emergency Service"]
+	services: any = ["Doorstep Delivery", "Book an Appointment", "Emergency Service"]
 	selectedService: any = ''
 	userInput: any = ''
 	responseStructure: any[] = [{ heading: "", getmsg: "", options: [], notemsg: "", input: "", emergency: "", patientName: "", doctorName: "", department: "", date: "", timeslot: "" }]
@@ -26,13 +26,12 @@ export class ChatbotComponent implements OnInit {
 	selectedDate: any = ''
 	timeSlots: any[] = []
 	selectedTimeSlot: any = ''
-	userInfo: any = [
+	userInfo: any = 
 		{
 			firstName: "",
 			lastName: "",
 			phone: "",
 		}
-	]
 	selectedDoorStepService: any = ''
 	selectedfile: File | null = null
 	otp: any = ''
@@ -42,7 +41,8 @@ export class ChatbotComponent implements OnInit {
 	address: string | undefined;
 	errorMessage: string | undefined;
 	locationErrormsg: any;
-	otpExpireTime : any = null
+	otpExpireTime: any = null
+	serviceChoosen : string = ''
 
 
 	constructor(private chatbotService: DataService) { }
@@ -50,8 +50,6 @@ export class ChatbotComponent implements OnInit {
 	ngOnInit(): void {
 		this.initialOptions()
 		console.log("step is :", this.step)
-		// this.getUserLocation()
-		// this.generateOtp()
 	}
 
 	ngAfterViewChecked(): void {
@@ -110,26 +108,26 @@ export class ChatbotComponent implements OnInit {
 
 			// get prescription
 			case 11:
-				this.getPrescription()
+				this.getNameDoorStep()
 				break;
 
-			//get name for door step delivery
-			case 13:
+			//get name for Doorstep Delivery
+			case 12:
 				this.getNameDoorStep()
 				break;
 
 			//get location type
-			case 14:
-				this.gettingLocationType()
+			case 13:
+				this.chooseLocationType()
 				break;
 
 			//confirmLocation
-			case 15:
-				this.confirmLocation()
+			case 14:
+				this.userLocation()
 				break;
 
 			case 16:
-				this.getAddressManually()
+				this.confirmLocation()
 				break;
 
 			case 17:
@@ -140,9 +138,12 @@ export class ChatbotComponent implements OnInit {
 				this.DoorstepOtp()
 				break
 
-
 			case 19:
-				this.sendingDoorStepMail()
+				this.getPrescription()
+				break
+
+			case 21:
+				this.confirmOrder()
 				break
 
 
@@ -190,16 +191,15 @@ export class ChatbotComponent implements OnInit {
 				this.loadDepartments()
 			}
 
-			else if (service === "1" || service === "Door Step Delivery" || service === "I wanna order Medicines") {
+			else if (service === "1" || service === "Doorstep Delivery" || service === "I wanna order Medicines") {
 				this.selectedService = "Door Step Services"
 				this.step = 10
-				this.userInput = ''
+				this.userInput = 'Doorstep Delivery'
 				this.getDoorStepService()
 			}
 
 			else if (service === "3" || service === "Emergency" || service === "I wanna call Ambulance" || service === "Emergency Service") {
 				this.emergencyServices()
-
 			}
 
 			else {
@@ -229,6 +229,7 @@ export class ChatbotComponent implements OnInit {
 	//get deartments
 	async loadDepartments(): Promise<void> {
 		try {
+			this.serviceChoosen = "Appointment servics"
 			const data = await this.chatbotService.getDepartments().toPromise();
 			this.departments = data
 
@@ -656,7 +657,7 @@ export class ChatbotComponent implements OnInit {
 			this.step = 8
 			this.userInput = ''
 		}
-		else{
+		else {
 			const newEntry = {
 				heading: `Invalid OTP`,
 				getmsg: "Try Again",
@@ -715,7 +716,7 @@ export class ChatbotComponent implements OnInit {
 			);
 		}
 
-		else if(userconfirm === "2" || userconfirm === " No, I need to make changes." || userconfirm === "no" || userconfirm === "No") {
+		else if (userconfirm === "2" || userconfirm === " No, I need to make changes." || userconfirm === "no" || userconfirm === "No") {
 			this.initialOptions()
 		}
 		else {
@@ -738,27 +739,13 @@ export class ChatbotComponent implements OnInit {
 
 	// appopintment thank you message
 	appointmentThankMsg(): void {
-		const userconfirm = this.userInput
+		if (this.userInput === "1" || this.userInput === "") {
 
-		if (userconfirm === "1" || userconfirm === "Yes, proceed with the booking." || userconfirm === "yeah" || userconfirm === "yes") {
-			const newEntry = {
-				heading: `Appointment request received for ${this.selectedDate} at ${this.selectedTimeSlot}. Our team will get back to you shortly.`,
-				getmsg: "Thank you for choosing Rashtrotthana Hospital.",
-				options: "",
-				notemsg: "",
-				input: this.userInput,
-				emergency: "",
-				patientName: "",
-				doctorName: "",
-				department: "",
-				date: "",
-				timeslot: ""
-			}
-			this.responseStructure.push(newEntry)
 		}
-		else if(userconfirm === "2" || userconfirm === " No, I need to make changes." || userconfirm === "no" || userconfirm === "No") {
-			this.step = 0
+		else if (this.userInput === "2") {
+
 		}
+
 		else {
 			const newEntry = {
 				heading: `Please enter valid input`,
@@ -777,13 +764,13 @@ export class ChatbotComponent implements OnInit {
 		}
 	}
 
-	// door step delivery functions
+	// Doorstep Delivery functions
 
 	// Door step services
 	async getDoorStepService(): Promise<void> {
 		const doorStepServices = ['Pharmacy', 'Blood Sample Collection']
 		const newEntry = {
-			heading: `You have selected doorstep delivery service.`,
+			heading: `You have selected Doorstep delivery service.`,
 			getmsg: "Please select the type of service by entering its number:",
 			options: doorStepServices,
 			notemsg: "( Note : Doorstep services are available from 8:00 AM to 8:00 PM)",
@@ -801,14 +788,14 @@ export class ChatbotComponent implements OnInit {
 		this.userInput = ''
 	}
 
-	// getting prescription
-	async getPrescription(): Promise<void> {
+	// confirming door step services service getting Name for Doorstep Delivery
+	async getNameDoorStep(): Promise<void> {
 		if (this.userInput === "1" || this.userInput === "Pharmacy" || this.userInput === "pharmacy") {
 			this.selectedDoorStepService = "Pharmacy"
-
+			this.serviceChoosen = "Pharmacy Service"
 			const newEntry = {
 				heading: `You have selected Pharmacy.`,
-				getmsg: "Please upload your prescription to proceed.",
+				getmsg: "Please enter your name.",
 				options: '',
 				notemsg: "",
 				input: this.selectedDoorStepService,
@@ -821,16 +808,16 @@ export class ChatbotComponent implements OnInit {
 			}
 
 			this.responseStructure.push(newEntry)
-			this.step = 12
+			this.step = 13
 			this.userInput = ''
 		}
 
 		else if (this.userInput === "2" || this.userInput === "blood sample collection" || this.userInput === "Blood Sample Collection") {
 			this.selectedDoorStepService = "Blood Sample Collection"
-
+			this.serviceChoosen = "Blood Sample Collection Service"
 			const newEntry = {
 				heading: `You have selected Blood Sample Collection.`,
-				getmsg: "Please upload your prescription to proceed.",
+				getmsg: "Please enter your name.",
 				options: '',
 				notemsg: "",
 				input: this.selectedDoorStepService,
@@ -843,7 +830,7 @@ export class ChatbotComponent implements OnInit {
 			}
 
 			this.responseStructure.push(newEntry)
-			this.step = 12
+			this.step = 13
 			this.userInput = ''
 		}
 
@@ -866,63 +853,26 @@ export class ChatbotComponent implements OnInit {
 		}
 	}
 
-	async savaPrescription(event: Event): Promise<void> {
-		const fileInput = event.target as HTMLInputElement;
-		if (fileInput.files && fileInput.files.length > 0) {
-			this.selectedfile = fileInput.files[0];
-		}
+	// getting location type and validating name
+	chooseLocationType(): void {
+		const pattern = /^[A-Za-z\s]+$/
+		const isValid = pattern.test(this.userInput)
 
-		if (this.selectedfile) {
-			this.chatbotService.postImage(this.selectedfile).subscribe(
-				(response) => {
-					console.log("image uploaded successfully", response)
-					console.log(this.selectedfile)
-				},
-				(error) => {
-					console.log("falied to upload image", error)
-				}
-			)
-
-			this.userInput = ''
-			const newEntry = {
-				heading: `Thank you! Your prescription has been received. Now, please provide the following details to complete the service request`,
-				getmsg: "Enter your full name.",
-				options: '',
-				notemsg: "(Note: Enter your name in the format: Firstname Lastname, e.g., Rajesh Kumar)",
-				input: this.selectedfile.name,
-				emergency: "",
-				patientName: "",
-				doctorName: "",
-				department: "",
-				date: "",
-				timeslot: ""
-			}
-
-			this.responseStructure.push(newEntry)
-
-			this.step = 13
-		}
-		else {
-			alert("Please upload the valid file")
-		}
-	}
-
-	// getting Name for door step delivery
-	async getNameDoorStep(): Promise<void> {
-		const pattern = /^[a-zA-Z\s]+$/;
-		const name = this.userInput
-		const isvalid = pattern.test(name)
-
-		if (isvalid) {
-			const [firstName, lastName] = name.split(' ')
+		if (isValid) {
+			const patientname = this.userInput
+			const [firstName, lastName] = patientname.split(' ')
 			this.userInfo.firstName = firstName
 			this.userInfo.lastName = lastName ? lastName : ''
+			console.log(this.userInfo.firstName, this.userInfo.lastName)
+			
+			const addressType = ['Current location', 'Enter Manually']
+
 			const newEntry = {
-				heading: `You entered ${this.userInfo.firstName} ${this.userInfo.lastName} as your name.`,
-				getmsg: "Next, please select your address type:",
-				options: ['Use current location', 'Enter address manually'],
-				notemsg: "( Note : Door Step Service is free within a 5km radius of Rashtrotthana Hospital. For locations beyond 5 km, delivery charges will apply)",
-				input: `${this.userInfo.firstName} ${this.userInfo.lastName}`,
+				heading: `You entered ${this.userInfo.firstName} ${this.userInfo.lastName} as your name. Now  Please enter your delivery address. `,
+				getmsg: "How would you like to provide your address? ",
+				options: addressType,
+				notemsg: "( Note : Pharmacy delivery is free within a 5km radius of Rashtrotthana Hospital. For locations beyond 5 km, delivery charges will apply)",
+				input: this.userInput,
 				emergency: "",
 				patientName: "",
 				doctorName: "",
@@ -938,7 +888,36 @@ export class ChatbotComponent implements OnInit {
 			const newEntry = {
 				heading: `Please Enter valid name`,
 				getmsg: "",
-				options: "",
+				options: '',
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+			this.userInput = ''
+		}
+	}
+
+	// getting user locations from user
+	async userLocation(): Promise<void> {
+		if (this.userInput === "1" || this.userInput === "Current Location" || this.userInput === "current location") {
+			this.getUserLocation()
+		}
+
+		else if (this.userInput === "2" || this.userInput === "Enter Manually" || this.userInput === "enter manually") {
+			this.getAddressManually()
+		}
+
+		else {
+			const newEntry = {
+				heading: `Please Enter valid option`,
+				getmsg: "",
+				options: '',
 				notemsg: "",
 				input: this.userInput,
 				emergency: "",
@@ -952,20 +931,6 @@ export class ChatbotComponent implements OnInit {
 		}
 	}
 
-	// getting address type manual or auto current location
-	async gettingLocationType(): Promise<void> {
-		if (this.userInput === '1' || this.userInput === "Use current location") {
-			await this.getUserLocation()
-		}
-
-		else if (this.userInput === '2' || this.userInput === "Enter address manually") {
-			await this.getAddressManually()
-		}
-
-		else {
-			console.log("please enter valid input")
-		}
-	}
 
 	// function to get current location automatically
 	getUserLocation(): void {
@@ -1023,7 +988,7 @@ export class ChatbotComponent implements OnInit {
 						timeslot: ""
 					}
 					this.responseStructure.push(newEntry)
-					this.step = 15
+					this.step = 16
 					this.userInput = ''
 				}
 				else {
@@ -1156,6 +1121,7 @@ export class ChatbotComponent implements OnInit {
 			this.userInfo.phone = `91${this.userInput}`
 
 			this.generateOtp()
+			// this.otpSms()
 
 			const newEntry = {
 				heading: `You entered ${this.userInfo.phone} as your phone number. We sent an OTP for verification.`,
@@ -1195,13 +1161,134 @@ export class ChatbotComponent implements OnInit {
 
 	}
 
+	// getting prescription
+	async getPrescription(): Promise<void> {
+		if(this.userInput === this.otp){
+			const newEntry = {
+				heading: `Thanks you for the verification.`,
+				getmsg: " Please upload your prescription to proceed.",
+				options: "",
+				notemsg: "",
+				input: this.otp,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+			this.userInput = ''
+			this.step = 20
+		}
+		else if(this.userInput !== this.otp){
+			const newEntry = {
+				heading: `Incorrect OTP`,
+				getmsg: "Try again",
+				options: "",
+				notemsg: "",
+				input: this.userInput,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+			this.userInput = ''
+		}
+		else if(this.otp === null){
+			const newEntry = {
+				heading: `Your OTP expired`,
+				getmsg: "",
+				options: "",
+				notemsg: "",
+				input: this.otp,
+				emergency: "",
+				patientName: "",
+				doctorName: "",
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+			this.responseStructure.push(newEntry)
+			this.userInput = ''
+		}
+	}
+
+	//saving Prescription
+	async savaPrescription(event: Event): Promise<void> {
+		const fileInput = event.target as HTMLInputElement;
+		if (fileInput.files && fileInput.files.length > 0) {
+			this.selectedfile = fileInput.files[0];
+		}
+
+		if (this.selectedfile) {
+			this.chatbotService.postImage(this.selectedfile).subscribe(
+				(response) => {
+					console.log("image uploaded successfully", response)
+					console.log(this.selectedfile)
+				},
+				(error) => {
+					console.log("falied to upload image", error)
+				}
+			)
+
+			this.userInput = ''
+			const newEntry = {
+				heading: `Your prescription has been received.`,
+				getmsg: "Shall I confirm your order ?",
+				options: ['Yes, proceed', 'No, I need to make changes.'],
+				notemsg: "",
+				input: this.selectedfile.name,
+				emergency: "",
+				patientName: ``,
+				doctorName: '',
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+
+			this.responseStructure.push(newEntry)
+			this.step = 21
+
+		}
+		else {
+			alert("Please upload the valid file")
+		}
+	}
+
+	async confirmOrder() : Promise<void>{
+		if(this.userInput === "1" || this.userInput === " Yes, proceed" || this.userInput === "yes"){
+			this.whatsappMsg()
+			this.sendingDoorStepMail()
+		}
+		else if(this.userInput === "2" || this.userInput === "No, I need to make changes." || this.userInput === "No, i need to make changes."){
+			this.initialOptions()
+		}
+		else {
+			const newEntry = {
+				heading: `Please enter valid input`,
+				getmsg: "",
+				options: "",
+				notemsg: "",
+				input: '',
+				emergency: "",
+				patientName: ``,
+				doctorName: '',
+				department: "",
+				date: "",
+				timeslot: ""
+			}
+
+			this.responseStructure.push(newEntry)
+		}
+	}
+
 	//verifying otp and sending mail
 	async sendingDoorStepMail(): Promise<void> {
-		const usersOtp = this.userInput
 
-
-		if (usersOtp === this.otp) {
-			console.log("doctor", this.selectedDoctor, "user", this.userInfo)
 			const formdata = new FormData
 			formdata.append('name', this.userInfo.firstName);
 			formdata.append('contact', this.userInfo.phone);
@@ -1248,14 +1335,10 @@ export class ChatbotComponent implements OnInit {
 					this.responseStructure.push(newEntry)
 				}
 			);
-		}
-		else {
-
-		}
 	}
 
+	// doorstep thank msg
 	async doorStepThankMsg(): Promise<void> {
-		if (this.otp === this.userInput) {
 			const newEntry = {
 				heading: `Thank you, ${this.userInfo.firstName} ${this.userInfo.lastName}! We have received your ${this.selectedDoorStepService} service request.`,
 				getmsg: " Our team will get back to you shortly.",
@@ -1270,25 +1353,10 @@ export class ChatbotComponent implements OnInit {
 				timeslot: ""
 			}
 			this.responseStructure.push(newEntry)
-		}
-		else {
-			const newEntry = {
-				heading: `invalid OTP`,
-				getmsg: "Plaease enter correct OTP",
-				options: "",
-				notemsg: "",
-				input: this.userInput,
-				emergency: "",
-				patientName: "",
-				doctorName: "",
-				department: "",
-				date: "",
-				timeslot: ""
-			}
-			this.responseStructure.push(newEntry)
-		}
+			this.userInput = ''
 	}
 
+	//emergency services
 	async emergencyServices(): Promise<void> {
 		const newEntry = {
 			heading: "In case of any medical emergency, please reach out to our 24/7 helpline:",
@@ -1304,6 +1372,34 @@ export class ChatbotComponent implements OnInit {
 			timeslot: ""
 		}
 		this.responseStructure.push(newEntry)
+	}
+
+	// sending otp
+	async otpSms() : Promise<void>{
+		const details = {
+			patientName : `${this.userInfo.firstName} ${this.userInfo.lastName}`,
+			otp : this.otp,
+			service : this.selectedService,
+			patientPhoneNumber : this.userInfo.phone
+		}
+
+		this.chatbotService.otpSms(details).toPromise()
+	}
+
+	//whatapp msg
+	async whatsappMsg() : Promise<void>{
+		const details = {
+			patientName : 	`${this.userInfo.firstName} ${this.userInfo.lastName}`,
+			service : this.serviceChoosen,
+			patientPhoneNumber : this.userInfo.phone
+		}
+
+		try{
+			await this.chatbotService.whatsApp(details).toPromise
+		}
+		catch(err){
+			console.log(err)
+		}
 	}
 
 	//capitalize
@@ -1384,25 +1480,25 @@ export class ChatbotComponent implements OnInit {
 		// Generate a 6-digit OTP
 		this.otp = Math.floor(100000 + Math.random() * 900000).toString();
 		console.log('Generated OTP:', this.otp);
-	  
+
 		// Clear any existing expiration timer
 		if (this.otpExpireTime) {
-		  console.log('Clearing previous timeout');
-		  clearTimeout(this.otpExpireTime);
+			console.log('Clearing previous timeout');
+			clearTimeout(this.otpExpireTime);
 		}
-	  
+
 		// Set a new expiration timer for 2 minutes
 		this.otpExpireTime = setTimeout(() => {
-		  this.expireOtp();
+			this.expireOtp();
 		}, 2 * 60 * 1000); // 2 minutes
-	  }
-	  
+	}
+
 	expireOtp(): void {
 		console.trace('OTP expired called from:');
 		// console.log('OTP expired:', this.otp);
 		this.otp = null; // Set OTP to null
 	}
-	  
+
 	//option clickable
 	handleOptionClick(option: string, optionIndex: number): void {
 		this.userInput = optionIndex.toString();

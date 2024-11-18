@@ -13,7 +13,7 @@
 //   // Variables
 //   isProcessing: boolean = false;
 //   step: number = 0;
-//   services: string[] = ['Door step delivery', 'Book an Appointment', 'Emergency'];
+//   services: string[] = ['Doorstep Delivery', 'Book an Appointment', 'Emergency'];
 //   userInput: string = '';
 //   responseStructure: any[] = [];
 //   departments: any[] = [];
@@ -115,7 +115,7 @@
 
 //       if (selectedService === 'Book an Appointment') {
 //         await this.loadDepartments();
-//       } else if (selectedService === 'Door step delivery') {
+//       } else if (selectedService === 'Doorstep Delivery') {
 //         this.step = 12;
 //         this.addResponse('You have selected doorstep delivery service. Please select the type of service by entering its number:', this.doorServices);
 //       }
